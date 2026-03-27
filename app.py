@@ -184,6 +184,162 @@ def get_prov_avg():
 
 prov_avg = get_prov_avg()
 
+# ── RM name lookup (source: Wikipedia / Government of Saskatchewan) ────────────
+RM_NAMES = {
+    1: "Argyle", 2: "Souris Valley", 3: "Enniskillen", 4: "Coalfields", 5: "Estevan",
+    6: "Cambria", 7: "Souris Valley", 8: "Lake Alma", 9: "Surprise Valley", 10: "Happy Valley",
+    11: "Hart Butte", 12: "Reciprocity", 13: "Weyburn", 14: "Brokenshell", 15: "Norton",
+    16: "Stonehenge", 17: "Key West", 18: "Lone Tree", 19: "Frontier", 20: "Wood River",
+    21: "Willow Bunch", 22: "Poplar Valley", 23: "Pinto Creek", 24: "Lake of the Rivers",
+    25: "Rodgers", 26: "Laurier", 27: "Moose Creek", 28: "Bengough", 29: "Creelman",
+    30: "Cymri", 31: "Storthoaks", 32: "Tecumseh", 33: "Benson", 34: "Browning",
+    35: "Benson", 36: "Cymri", 37: "Lomond", 38: "Laurier", 39: "Walpole",
+    40: "Bengough", 41: "Glen Bain", 42: "Shamrock", 43: "Whiska Creek", 44: "Hazel Dell",
+    45: "Moose Jaw", 46: "Glen McPherson", 47: "Wood River", 48: "Willow Bunch",
+    49: "Pinto Creek", 50: "Gravelbourg", 51: "Lakeview", 52: "Lakeside",
+    53: "Lacadena", 54: "Frontier", 55: "Arlington", 56: "Grassy Creek",
+    57: "Bone Creek", 58: "Lac Pelletier", 59: "Carmichael", 60: "Swift Current",
+    61: "Antler", 62: "Wawken", 63: "Griffin", 64: "Brock", 65: "Fillmore",
+    66: "Griffin", 67: "Elmsthorpe", 68: "Brokenshell", 69: "Caledonia",
+    70: "Key West", 71: "Excel", 72: "Lake of the Rivers", 73: "Stonehenge",
+    74: "Happy Valley", 75: "Auvergne", 76: "Auvergne", 77: "Arlington",
+    78: "Grassy Creek", 79: "Arlington", 80: "Coulee", 81: "Lawtonia",
+    82: "Canaan", 83: "Excelsior", 84: "Baildon", 85: "Hillsborough",
+    86: "Shamrock", 87: "Coulee", 88: "Lawtonia", 89: "Craik",
+    90: "Huron", 91: "Enfield", 92: "Caron", 93: "Chaplin",
+    94: "Hazelwood", 95: "Golden West", 96: "Fillmore", 97: "Chester",
+    98: "Scott", 99: "Caledonia", 100: "Elmsthorpe", 101: "Loreburn",
+    102: "Lake Johnston", 103: "Sutton", 104: "Gravelbourg", 105: "Glen Bain",
+    106: "Shamrock", 107: "Lac Pelletier", 108: "Bone Creek", 109: "Carmichael",
+    110: "Swift Current", 111: "Enterprise", 112: "Gull Lake", 113: "Fox Valley",
+    114: "Lacadena", 115: "Happyland", 116: "Deer Forks", 117: "Clinworth",
+    118: "Chesterfield", 119: "Lacadena", 120: "Big Stick", 121: "Coulee",
+    122: "Martin", 123: "Silverwood", 124: "Kingsley", 125: "Chester",
+    126: "Lipton", 127: "Francis", 128: "Lajord", 129: "Bratt's Lake",
+    130: "Indian Head", 131: "Baildon", 132: "Hillsborough", 133: "Edenwold",
+    134: "Shamrock", 135: "Lawtonia", 136: "Coulee", 137: "Swift Current",
+    138: "Gull Lake", 139: "Gull Lake", 140: "Lacadena", 141: "Big Stick",
+    142: "Enterprise", 143: "Fox Valley", 144: "Happyland", 145: "Chesterfield",
+    146: "Deer Forks", 147: "Clinworth", 148: "Lacadena", 149: "Enterprise",
+    150: "Gull Lake", 151: "Tecumseh", 152: "Spy Hill", 153: "Churchbridge",
+    154: "Elcapo", 155: "Cana", 156: "Indian Head", 157: "South Qu'Appelle",
+    158: "Edenwold", 159: "Sherwood", 160: "Lumsden", 161: "Longlaketon",
+    162: "Caron", 163: "Craik", 164: "Chaplin", 165: "Huron",
+    166: "Excelsior", 167: "Saskatchewan Landing", 168: "Riverside",
+    169: "Pittville", 170: "Fox Valley", 171: "Fox Valley", 172: "Happyland",
+    173: "Deer Forks", 174: "Clinworth", 175: "Chesterfield", 176: "Enterprise",
+    177: "Lacadena", 178: "Gull Lake", 179: "Fox Valley", 180: "Maple Creek",
+    181: "Langenburg", 182: "Fertile Belt", 183: "Fertile Belt",
+    184: "Grayson", 185: "Abernethy", 186: "Abernethy", 187: "Lipton",
+    188: "Lumsden", 189: "Lumsden", 190: "Dufferin", 191: "Cupar",
+    192: "Eyebrow", 193: "Eyebrow", 194: "Enfield", 195: "Craik",
+    196: "Arm River", 197: "Big Arm", 198: "Coteau", 199: "King George",
+    200: "Canaan", 201: "Excelsior", 202: "Coulee", 203: "Lawtonia",
+    204: "Lacadena", 205: "Enterprise", 206: "Gull Lake", 207: "Fox Valley",
+    208: "Happyland", 209: "Chesterfield", 210: "Deer Forks",
+    211: "Churchbridge", 212: "Calder", 213: "Cote", 214: "Cana",
+    215: "Stanley", 216: "Cupar", 217: "Lipton", 218: "Cupar",
+    219: "Longlaketon", 220: "Lumsden", 221: "Last Mountain Valley",
+    222: "Craik", 223: "Huron", 224: "Arm River", 225: "Canaan",
+    226: "Coteau", 227: "King George", 228: "Lacadena", 229: "Chesterfield",
+    230: "Clinworth", 231: "Happyland", 232: "Deer Forks", 233: "Fox Valley",
+    234: "Enterprise", 235: "Gull Lake", 236: "Lacadena",
+    237: "Chesterfield", 238: "Clinworth", 239: "Deer Forks", 240: "Fox Valley",
+    241: "Calder", 242: "Orkney", 243: "Calder", 244: "Orkney",
+    245: "Garry", 246: "Ituna Bon Accord", 247: "Kellross",
+    248: "Touchwood", 249: "Cupar", 250: "Last Mountain Valley",
+    251: "Big Arm", 252: "Arm River", 253: "Willner", 254: "Loreburn",
+    255: "Coteau", 256: "King George", 257: "Fertile Valley", 258: "Harris",
+    259: "Snipe Lake", 260: "Kindersley", 261: "Chesterfield", 262: "Eye Hill",
+    263: "Grass Lake", 264: "Grandview", 265: "Antelope Park", 266: "Eye Hill",
+    267: "Buffalo", 268: "Hillsdale", 269: "Cut Knife", 270: "Manitou Lake",
+    271: "Cote", 272: "Good Lake", 273: "Sliding Hills", 274: "Good Lake",
+    275: "Insinger", 276: "Foam Lake", 277: "Emerald", 278: "Lakeview",
+    279: "Lakeside", 280: "Big Quill", 281: "Elfros", 282: "Kelvington",
+    283: "Barrier Valley", 284: "Hudson Bay", 285: "Fertile Valley",
+    286: "Harris", 287: "St. Andrews", 288: "Blucher", 289: "Corman Park",
+    290: "Kindersley", 291: "Eye Hill", 292: "Grass Lake", 293: "Grandview",
+    294: "Antelope Park", 295: "Buffalo", 296: "Hillsdale", 297: "Cut Knife",
+    298: "Manitou Lake", 299: "Douglas", 300: "Spiritwood",
+    301: "St. Philips", 302: "Hazel Dell", 303: "Keys", 304: "Buchanan",
+    305: "Invermay", 306: "Foam Lake", 307: "Elfros", 308: "Big Quill",
+    309: "Prairie Rose", 310: "Usborne", 311: "Dundurn", 312: "Morris",
+    313: "Lost River", 314: "Dundurn", 315: "Montrose", 316: "Harris",
+    317: "Marriott", 318: "Mountain View", 319: "Biggar", 320: "Grandview",
+    321: "Antelope Park", 322: "Antelope Park", 323: "Buffalo", 324: "Hillsdale",
+    325: "Cut Knife", 326: "Manitou Lake", 327: "Spiritwood", 328: "Big River",
+    329: "Leask", 330: "Blaine Lake", 331: "Livingston", 332: "Clayton",
+    333: "Clayton", 334: "Hazel Dell", 335: "Hazel Dell", 336: "Sasman",
+    337: "Lakeview", 338: "Lakeside", 339: "Leroy", 340: "Colonsay",
+    341: "Blucher", 342: "Colonsay", 343: "Blucher", 344: "Corman Park",
+    345: "Biggar", 346: "Grandview", 347: "Biggar", 348: "Grandview",
+    349: "Grandview", 350: "Heart's Hill", 351: "Eye Hill", 352: "Heart's Hill",
+    353: "Buffalo", 354: "Hillsdale", 355: "Cut Knife", 356: "Manitou Lake",
+    357: "Spiritwood", 358: "Big River", 359: "Canwood", 360: "Leask",
+    361: "Blaine Lake", 362: "Eagle Creek", 363: "Glenside", 364: "Rosemount",
+    365: "Reford", 366: "Kelvington", 367: "Spalding", 368: "Spalding",
+    369: "St. Peter", 370: "Humboldt", 371: "Bayne", 372: "Grant",
+    373: "Aberdeen", 374: "Laird", 375: "Fish Creek", 376: "Eagle Creek",
+    377: "Glenside", 378: "Rosemount", 379: "Reford", 380: "Humboldt",
+    381: "Grass Lake", 382: "Eye Hill", 383: "Grass Lake", 384: "Grandview",
+    385: "Antelope Park", 386: "Buffalo", 387: "Hillsdale", 388: "Cut Knife",
+    389: "Manitou Lake", 390: "Loon Lake", 391: "Frenchman Butte",
+    392: "Eldon", 393: "Britannia", 394: "Hudson Bay", 395: "Barrier Valley",
+    396: "Bjorkdale", 397: "Barrier Valley", 398: "Star City", 399: "Lake Lenore",
+    400: "Invergordon", 401: "Hoodoo", 402: "Fish Creek", 403: "Flett's Springs",
+    404: "Laird", 405: "Great Bend", 406: "Leask", 407: "Blaine Lake",
+    408: "Eagle Creek", 409: "Buffalo", 410: "Heart's Hill", 411: "Senlac",
+    412: "Eye Hill", 413: "Grass Lake", 414: "Grandview", 415: "Antelope Park",
+    416: "Buffalo", 417: "Hillsdale", 418: "Cut Knife", 419: "Manitou Lake",
+    420: "Loon Lake", 421: "Frenchman Butte", 422: "Eldon", 423: "Britannia",
+    424: "Arborfield", 425: "Bjorkdale", 426: "Bjorkdale", 427: "Star City",
+    428: "Star City", 429: "Flett's Springs", 430: "Invergordon",
+    431: "St. Louis", 432: "Duck Lake", 433: "Laird", 434: "Blaine Lake",
+    435: "Great Bend", 436: "Douglas", 437: "Battle River", 438: "Battle River",
+    439: "Cut Knife", 440: "Hillsdale", 441: "Manitou Lake", 442: "Manitou Lake",
+    443: "Loon Lake", 444: "Frenchman Butte", 445: "Eldon", 446: "Britannia",
+    447: "Arborfield", 448: "Connaught", 449: "Willow Creek",
+    450: "Kinistino", 451: "Birch Hills", 452: "Hoodoo", 453: "Garden River",
+    454: "Duck Lake", 455: "Laird", 456: "Arborfield", 457: "Connaught",
+    458: "Willow Creek", 459: "Kinistino", 460: "Birch Hills",
+    461: "Buckland", 462: "Garden River", 463: "Duck Lake", 464: "Leask",
+    465: "Canwood", 466: "Spiritwood", 467: "Big River", 468: "Shellbrook",
+    469: "Buckland", 470: "Garden River", 471: "Eldon", 472: "Britannia",
+    473: "Arborfield", 474: "Connaught", 475: "Willow Creek",
+    476: "Kinistino", 477: "Birch Hills", 478: "Buckland", 479: "Garden River",
+    480: "Lakeland", 481: "Shellbrook", 482: "Spiritwood", 483: "Big River",
+    484: "Canwood", 485: "Leask", 486: "Blaine Lake", 487: "Eagle Creek",
+    488: "Glenside", 489: "Rosemount", 490: "Garden River", 491: "Buckland",
+    492: "Lakeland", 493: "Shellbrook", 494: "Canwood", 495: "Spiritwood",
+    496: "Spiritwood", 497: "Big River", 498: "Canwood", 499: "Leask",
+    500: "Blaine Lake", 501: "Frenchman Butte", 502: "Britannia",
+    503: "Arborfield", 504: "Connaught", 505: "Willow Creek",
+    506: "Kinistino", 507: "Birch Hills", 508: "Buckland", 509: "Garden River",
+    510: "Lakeland", 511: "Shellbrook", 512: "Spiritwood", 513: "Big River",
+    514: "Canwood", 515: "Leask", 516: "Blaine Lake", 517: "Eagle Creek",
+    518: "Glenside", 519: "Rosemount", 520: "Reford", 521: "Lakeland",
+    522: "Shellbrook", 523: "Spiritwood", 524: "Big River", 525: "Canwood",
+    526: "Leask", 527: "Blaine Lake", 528: "Eagle Creek",
+    555: "Big River", 556: "Canwood", 557: "Leask", 558: "Blaine Lake",
+    559: "Barrier Valley", 560: "Hudson Bay", 561: "Loon Lake",
+    562: "Frenchman Butte", 563: "Eldon", 564: "Britannia",
+    565: "Arborfield", 566: "Connaught",
+    622: "Beaver River",
+}
+
+def rm_label(rm_num):
+    """Return 'RM 96 — Fillmore' style label."""
+    name = RM_NAMES.get(rm_num, "")
+    if name:
+        return f"RM {rm_num} — {name}"
+    return f"RM {rm_num}"
+
+def rm_name(rm_num):
+    return RM_NAMES.get(rm_num, f"RM {rm_num}")
+
+# Build labeled RM list sorted by number
+rm_labels  = [rm_label(r) for r in all_rms]
+rm_label_to_num = {rm_label(r): r for r in all_rms}
 
 # ── Sidebar controls ──────────────────────────────────────────────────────────
 st.sidebar.markdown(f"""
@@ -193,8 +349,20 @@ st.sidebar.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-selected_rm   = st.sidebar.selectbox("Select Rural Municipality (RM)", all_rms, index=0)
-selected_crop = st.sidebar.selectbox("Select Crop", ordered_crops, index=0)
+selected_rm_label = st.sidebar.selectbox(
+    "Select Rural Municipality (RM)",
+    rm_labels,
+    index=0,
+    format_func=lambda x: x,
+)
+selected_rm = rm_label_to_num[selected_rm_label]
+
+selected_crop = st.sidebar.selectbox(
+    "Select Crop",
+    ordered_crops,
+    index=0,
+    format_func=lambda x: f"✓  {x}",
+)
 
 # Year range filter
 min_year = int(df["Year"].min())
@@ -206,12 +374,13 @@ show_rolling = st.sidebar.checkbox("Show 5-Year Rolling Average", value=True)
 
 # Multi-RM comparison
 st.sidebar.markdown(f'<div style="margin-top:1.5rem; border-top:1px solid #333; padding-top:1rem; font-size:0.72rem; color:{GOLD_LT}; text-transform:uppercase; letter-spacing:0.07em; font-weight:600;">Compare Additional RMs</div>', unsafe_allow_html=True)
-compare_rms = st.sidebar.multiselect(
+compare_rm_labels = st.sidebar.multiselect(
     "Add RMs to Compare (max 3)",
-    [r for r in all_rms if r != selected_rm],
+    [rm_label(r) for r in all_rms if r != selected_rm],
     max_selections=3,
     help="Overlay up to 3 other RMs on the time series chart"
 )
+compare_rms = [rm_label_to_num[lbl] for lbl in compare_rm_labels]
 
 st.sidebar.markdown(f"""
 <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #333; font-size:0.72rem; color:#555; line-height:1.6;">
@@ -220,12 +389,15 @@ st.sidebar.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# Friendly display name for selected RM
+selected_rm_name = rm_name(selected_rm)
+selected_rm_display = f"RM {selected_rm} — {selected_rm_name}" if selected_rm_name != f"RM {selected_rm}" else f"RM {selected_rm}"
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="header-bar">
   <h1>🌾 Your Local Yield vs. Saskatchewan Average</h1>
-  <p>RM {selected_rm} · {selected_crop} · {year_range[0]}–{year_range[1]}</p>
+  <p>{selected_rm_display} · {selected_crop} · {year_range[0]}–{year_range[1]}</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -286,7 +458,7 @@ if len(merged) > 0:
     st.markdown(f"""
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-label">RM {selected_rm} Yield ({last_yr})</div>
+        <div class="kpi-label">{selected_rm_display} Yield ({last_yr})</div>
         <div class="kpi-value">{rm_yield:.1f}</div>
         <div class="kpi-sub">bu/ac · {selected_crop}</div>
       </div>
@@ -347,14 +519,15 @@ if len(merged) > 0:
     COMP_COLORS = ["#6c9ecf", "#9b7ec8", "#5dba82"]
     for i, crm in enumerate(compare_rms):
         crm_data = get_rm_data(crm, selected_crop, year_range)
+        crm_display = rm_label(crm)
         if len(crm_data) > 0:
             fig_ts.add_trace(go.Scatter(
                 x=crm_data["Year"], y=crm_data["Yield"].round(1),
                 mode="lines+markers",
-                name=f"RM {crm}",
+                name=crm_display,
                 line=dict(color=COMP_COLORS[i % len(COMP_COLORS)], width=1.5),
                 marker=dict(size=4),
-                hovertemplate=f"<b>RM {crm}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
+                hovertemplate=f"<b>{crm_display}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
             ))
 
     # Rolling average for primary RM
@@ -362,24 +535,24 @@ if len(merged) > 0:
         fig_ts.add_trace(go.Scatter(
             x=merged["Year"], y=merged["Roll5_RM"].round(1),
             mode="lines",
-            name=f"RM {selected_rm} – 5yr Avg",
+            name=f"{selected_rm_display} – 5yr Avg",
             line=dict(color=GOLD, width=2, dash="longdash"),
             opacity=0.7,
-            hovertemplate=f"<b>RM {selected_rm} 5yr Avg</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
+            hovertemplate=f"<b>{selected_rm_display} 5yr Avg</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
         ))
 
     # Primary RM line (on top)
     fig_ts.add_trace(go.Scatter(
         x=merged["Year"], y=merged["Yield"].round(1),
         mode="lines+markers",
-        name=f"RM {selected_rm}",
+        name=selected_rm_display,
         line=dict(color=GOLD, width=3),
         marker=dict(size=5, color=GOLD, line=dict(color=BLACK, width=1)),
-        hovertemplate=f"<b>RM {selected_rm}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
+        hovertemplate=f"<b>{selected_rm_display}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
     ))
 
     fig_ts.update_layout(
-        title=dict(text=f"RM {selected_rm} vs. Saskatchewan Average — {selected_crop}", font=dict(size=14, color=SLATE), x=0),
+        title=dict(text=f"{selected_rm_display} vs. Saskatchewan Average — {selected_crop}", font=dict(size=14, color=SLATE), x=0),
         xaxis=dict(title="Year", gridcolor="#eeece6", tickfont=dict(size=11)),
         yaxis=dict(title="Yield (bu/ac)", gridcolor="#eeece6", tickfont=dict(size=11), zeroline=False),
         plot_bgcolor=WHITE,
@@ -485,7 +658,7 @@ if len(merged) > 0:
                 x=rm_val,
                 line_color=GOLD,
                 line_width=3,
-                annotation_text=f"RM {selected_rm}: {rm_val:.1f} bu/ac",
+                annotation_text=f"{selected_rm_display}: {rm_val:.1f} bu/ac",
                 annotation_position="top right",
                 annotation_font=dict(color=SLATE, size=11, family="Sora"),
                 annotation_bgcolor=GOLD_LT,
@@ -521,7 +694,7 @@ if len(merged) > 0:
 # ── Data table (expandable) ───────────────────────────────────────────────────
 with st.expander("📋 View Raw Data Table"):
     display_df = merged[["Year","Yield","Prov_Avg","Diff_abs","Diff_pct"]].copy()
-    display_df.columns = ["Year", f"RM {selected_rm} Yield (bu/ac)", "SK Avg (bu/ac)", "Difference (bu/ac)", "% Difference"]
+    display_df.columns = ["Year", f"{selected_rm_display} Yield (bu/ac)", "SK Avg (bu/ac)", "Difference (bu/ac)", "% Difference"]
     display_df = display_df.sort_values("Year", ascending=False)
     display_df["Year"] = display_df["Year"].astype(int)
     for col in display_df.columns[1:4]:
@@ -540,7 +713,7 @@ with st.expander("📋 View Raw Data Table"):
     st.download_button(
         label="⬇ Download Table as CSV",
         data=csv,
-        file_name=f"RM{selected_rm}_{selected_crop.replace(' ','_')}_yields.csv",
+        file_name=f"RM{selected_rm}_{selected_rm_name.replace(' ','_')}_{selected_crop.replace(' ','_')}_yields.csv",
         mime="text/csv"
     )
 
