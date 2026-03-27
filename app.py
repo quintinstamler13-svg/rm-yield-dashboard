@@ -42,7 +42,13 @@ st.markdown(f"""
     border-right: 3px solid {GOLD};
   }}
   section[data-testid="stSidebar"] * {{ color: {WHITE} !important; }}
+  /* Make selectbox container grey so white text is readable */
+  section[data-testid="stSidebar"] .stSelectbox > div > div,
+  section[data-testid="stSidebar"] .stMultiSelect > div > div {{
+    background-color: #3a3a3a !important;
+  }}
   section[data-testid="stSidebar"] .stSelectbox label,
+  section[data-testid="stSidebar"] .stMultiSelect label,
   section[data-testid="stSidebar"] .stSlider label {{
     color: {GOLD_LT} !important;
     font-size: 0.78rem;
@@ -361,8 +367,6 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── RM selector ───────────────────────────────────────────────────────────────
-# Options are stored as the full display string "RM 1 — Argyle" so the
-# selected value shown in the collapsed slot naturally includes the name.
 selected_rm_label = st.sidebar.selectbox(
     "Select Rural Municipality (RM)",
     rm_labels,
@@ -371,7 +375,6 @@ selected_rm_label = st.sidebar.selectbox(
 selected_rm = rm_label_to_num[selected_rm_label]
 
 # ── Crop selector ─────────────────────────────────────────────────────────────
-# Plain strings — no format_func — so the selected crop shows in the slot.
 selected_crop = st.sidebar.selectbox(
     "Select Crop",
     ordered_crops,
