@@ -341,18 +341,28 @@ def rm_name(rm_num):
 rm_labels  = [rm_label(r) for r in all_rms]
 rm_label_to_num = {rm_label(r): r for r in all_rms}
 
+# ── JGL logo embedded as base64 (no external URL dependency) ─────────────────
+import base64 as _b64, pathlib as _pl
+_logo_path = _pl.Path(__file__).parent / "JGL_Logo.png"
+if _logo_path.exists():
+    _logo_b64 = _b64.b64encode(_logo_path.read_bytes()).decode()
+    LOGO_SRC = f"data:image/png;base64,{_logo_b64}"
+else:
+    LOGO_SRC = ""
+
 # ── Sidebar controls ──────────────────────────────────────────────────────────
+_logo_tag = f'<img src="{LOGO_SRC}" style="width:90px; margin-bottom:6px; display:block;">' if LOGO_SRC else ""
 st.sidebar.markdown(f"""
 <div style="padding: 1rem 0 1.5rem 0; border-bottom: 1px solid #333; margin-bottom: 1.5rem;">
-  <img src="https://jglcapital.ca/wp-content/uploads/2019/07/JGL-Capital-Logo.png"
-       onerror="this.style.display='none'"
-       style="height:38px; margin-bottom:8px; display:block;">
+  {_logo_tag}
   <div style="font-size:1.3rem; font-weight:700; color:{GOLD}; letter-spacing:-0.02em;">JGL Capital</div>
   <div style="font-size:0.75rem; color:#888; margin-top:0.2rem;">RM Yield Analytics</div>
 </div>
 """, unsafe_allow_html=True)
 
-# RM selector — options are already full "RM 1 — Argyle" strings, so selection slot shows the name
+# ── RM selector ───────────────────────────────────────────────────────────────
+# Options are stored as the full display string "RM 1 — Argyle" so the
+# selected value shown in the collapsed slot naturally includes the name.
 selected_rm_label = st.sidebar.selectbox(
     "Select Rural Municipality (RM)",
     rm_labels,
@@ -360,7 +370,8 @@ selected_rm_label = st.sidebar.selectbox(
 )
 selected_rm = rm_label_to_num[selected_rm_label]
 
-# Crop selector — store display strings so selected slot shows the chosen crop clearly
+# ── Crop selector ─────────────────────────────────────────────────────────────
+# Plain strings — no format_func — so the selected crop shows in the slot.
 selected_crop = st.sidebar.selectbox(
     "Select Crop",
     ordered_crops,
@@ -385,13 +396,11 @@ compare_rm_labels = st.sidebar.multiselect(
 )
 compare_rms = [rm_label_to_num[lbl] for lbl in compare_rm_labels]
 
-# Sidebar footer — logo, author, address
+# ── Sidebar footer — logo, author, address ────────────────────────────────────
+_footer_logo = f'<img src="{LOGO_SRC}" style="width:80px; margin-bottom:10px; display:block;">' if LOGO_SRC else '<div style="font-size:1rem;font-weight:700;color:{GOLD};margin-bottom:8px;">JGL Capital</div>'
 st.sidebar.markdown(f"""
 <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #333;">
-  <img src="https://jglcapital.ca/wp-content/uploads/2019/07/JGL-Capital-Logo.png"
-       onerror="this.style.display='none'; this.nextSibling.style.display='block'"
-       style="width:110px; margin-bottom:10px; display:block; filter:brightness(0) invert(1);">
-  <div style="display:none; font-size:1rem; font-weight:700; color:{GOLD}; margin-bottom:8px;">JGL Capital</div>
+  {_footer_logo}
   <div style="font-size:0.72rem; color:#666; line-height:1.8;">
     <div style="color:{GOLD_LT}; font-weight:600; margin-bottom:2px;">Quintin Stamler</div>
     <div style="color:#888;">Futures &amp; Options Broker</div>
