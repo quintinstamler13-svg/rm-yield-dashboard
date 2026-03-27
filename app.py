@@ -183,6 +183,29 @@ CROP_ORDER = ["Canola","Spring Wheat","Barley","Oats","Durum","Lentils","Peas",
               "Tame Hay","Chickpeas","Sunflowers","Spring Rye"]
 ordered_crops = [c for c in CROP_ORDER if c in all_crops]
 
+# ── Units per crop ─────────────────────────────────────────────────────────────
+CROP_UNITS = {
+    "Winter Wheat":  "bu/ac",
+    "Canola":        "bu/ac",
+    "Spring Wheat":  "bu/ac",
+    "Mustard":       "lbs/ac",
+    "Durum":         "bu/ac",
+    "Sunflowers":    "lbs/ac",
+    "Oats":          "bu/ac",
+    "Lentils":       "lbs/ac",
+    "Peas":          "bu/ac",
+    "Barley":        "bu/ac",
+    "Fall Rye":      "bu/ac",
+    "Canary Seed":   "lbs/ac",
+    "Spring Rye":    "bu/ac",
+    "Tame Hay":      "tons/ac",
+    "Flax":          "bu/ac",
+    "Chickpeas":     "lbs/ac",
+}
+
+def crop_unit(crop):
+    return CROP_UNITS.get(crop, "bu/ac")
+
 # Provincial averages
 @st.cache_data
 def get_prov_avg():
@@ -492,16 +515,16 @@ if len(merged) > 0:
       <div class="kpi-card">
         <div class="kpi-label">{selected_rm_display} Yield ({last_yr})</div>
         <div class="kpi-value">{rm_yield:.1f}</div>
-        <div class="kpi-sub">bu/ac · {selected_crop}</div>
+        <div class="kpi-sub">{crop_unit(selected_crop)} · {selected_crop}</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">SK Provincial Average</div>
         <div class="kpi-value">{prov_yield:.1f}</div>
-        <div class="kpi-sub">bu/ac · {last_yr}</div>
+        <div class="kpi-sub">{crop_unit(selected_crop)} · {last_yr}</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">vs. Provincial Average</div>
-        <div class="kpi-value {diff_class}">{diff_arrow} {abs(diff_abs):.1f} bu/ac</div>
+        <div class="kpi-value {diff_class}">{diff_arrow} {abs(diff_abs):.1f} {crop_unit(selected_crop)}</div>
         <div class="kpi-sub {diff_class}">{diff_pct:+.1f}% above/below average</div>
       </div>
       <div class="kpi-card">
@@ -544,7 +567,7 @@ if len(merged) > 0:
         mode="lines",
         name="SK Provincial Average",
         line=dict(color=GOLD_LT, width=2, dash="dot"),
-        hovertemplate="<b>SK Avg</b><br>Year: %{x}<br>Yield: %{y:.1f} bu/ac<extra></extra>"
+        hovertemplate=f"<b>SK Avg</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} {crop_unit(selected_crop)}<extra></extra>"
     ))
 
     # Compare RMs
@@ -559,7 +582,7 @@ if len(merged) > 0:
                 name=crm_display,
                 line=dict(color=COMP_COLORS[i % len(COMP_COLORS)], width=1.5),
                 marker=dict(size=4),
-                hovertemplate=f"<b>{crm_display}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
+                hovertemplate=f"<b>{crm_display}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} {crop_unit(selected_crop)}<extra></extra>"
             ))
 
     # Rolling average for primary RM
@@ -570,7 +593,7 @@ if len(merged) > 0:
             name=f"{selected_rm_display} – 5yr Avg",
             line=dict(color=GOLD, width=2, dash="longdash"),
             opacity=0.7,
-            hovertemplate=f"<b>{selected_rm_display} 5yr Avg</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
+            hovertemplate=f"<b>{selected_rm_display} 5yr Avg</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} {crop_unit(selected_crop)}<extra></extra>"
         ))
 
     # Primary RM line (on top)
@@ -580,13 +603,13 @@ if len(merged) > 0:
         name=selected_rm_display,
         line=dict(color=GOLD, width=3),
         marker=dict(size=5, color=GOLD, line=dict(color=BLACK, width=1)),
-        hovertemplate=f"<b>{selected_rm_display}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} bu/ac<extra></extra>"
+        hovertemplate=f"<b>{selected_rm_display}</b><br>Year: %{{x}}<br>Yield: %{{y:.1f}} {crop_unit(selected_crop)}<extra></extra>"
     ))
 
     fig_ts.update_layout(
         title=dict(text=f"{selected_rm_display} vs. Saskatchewan Average — {selected_crop}", font=dict(size=14, color=SLATE), x=0),
         xaxis=dict(title="Year", gridcolor="#eeece6", tickfont=dict(size=11)),
-        yaxis=dict(title="Yield (bu/ac)", gridcolor="#eeece6", tickfont=dict(size=11), zeroline=False),
+        yaxis=dict(title=f"Yield ({crop_unit(selected_crop)})", gridcolor="#eeece6", tickfont=dict(size=11), zeroline=False),
         plot_bgcolor=WHITE,
         paper_bgcolor=WHITE,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0, font=dict(size=11)),
@@ -654,7 +677,7 @@ if len(merged) > 0:
     <tr><td style="padding:3px 0; color:{MUTED};">Avg underperformance</td><td style="text-align:right; color:{RED};">{avg_underperform:+.1f}%</td></tr>
     <tr><td style="padding:3px 0; color:{MUTED};">Best year</td><td style="text-align:right;">{int(best_yr)} ({best_val:+.1f}%)</td></tr>
     <tr><td style="padding:3px 0; color:{MUTED};">Worst year</td><td style="text-align:right;">{int(worst_yr)} ({worst_val:+.1f}%)</td></tr>
-    <tr><td style="padding:3px 0; color:{MUTED};">Yield volatility (σ)</td><td style="text-align:right;">{merged['Yield'].std():.1f} bu/ac</td></tr>
+    <tr><td style="padding:3px 0; color:{MUTED};">Yield volatility (σ)</td><td style="text-align:right;">{merged['Yield'].std():.1f} {crop_unit(selected_crop)}</td></tr>
     <tr><td style="padding:3px 0; color:{MUTED};">Coeff. of variation</td><td style="text-align:right;">{merged['Yield'].std()/merged['Yield'].mean()*100:.1f}%</td></tr>
   </table>
 </div>
@@ -690,7 +713,7 @@ if len(merged) > 0:
                 x=rm_val,
                 line_color=GOLD,
                 line_width=3,
-                annotation_text=f"{selected_rm_display}: {rm_val:.1f} bu/ac",
+                annotation_text=f"{selected_rm_display}: {rm_val:.1f} {crop_unit(selected_crop)}",
                 annotation_position="top right",
                 annotation_font=dict(color=SLATE, size=11, family="Sora"),
                 annotation_bgcolor=GOLD_LT,
@@ -704,14 +727,14 @@ if len(merged) > 0:
                 line_color=SLATE_M,
                 line_width=2,
                 line_dash="dash",
-                annotation_text=f"SK Avg: {float(prov_val_latest.values[0]):.1f} bu/ac",
+                annotation_text=f"SK Avg: {float(prov_val_latest.values[0]):.1f} {crop_unit(selected_crop)}",
                 annotation_position="top left",
                 annotation_font=dict(color=MUTED, size=10, family="Sora"),
             )
 
         fig_dist.update_layout(
             title=dict(text=f"Distribution of {selected_crop} Yields Across All SK RMs — {latest_year}", font=dict(size=13, color=SLATE), x=0),
-            xaxis=dict(title="Yield (bu/ac)", gridcolor="#eeece6"),
+            xaxis=dict(title=f"Yield ({crop_unit(selected_crop)})", gridcolor="#eeece6"),
             yaxis=dict(title="Number of RMs", gridcolor="#eeece6"),
             plot_bgcolor=WHITE,
             paper_bgcolor=WHITE,
@@ -726,7 +749,7 @@ if len(merged) > 0:
 # ── Data table (expandable) ───────────────────────────────────────────────────
 with st.expander("📋 View Raw Data Table"):
     display_df = merged[["Year","Yield","Prov_Avg","Diff_abs","Diff_pct"]].copy()
-    display_df.columns = ["Year", f"{selected_rm_display} Yield (bu/ac)", "SK Avg (bu/ac)", "Difference (bu/ac)", "% Difference"]
+    display_df.columns = ["Year", f"{selected_rm_display} Yield ({crop_unit(selected_crop)})", f"SK Avg ({crop_unit(selected_crop)})", f"Difference ({crop_unit(selected_crop)})", "% Difference"]
     display_df = display_df.sort_values("Year", ascending=False)
     display_df["Year"] = display_df["Year"].astype(int)
     for col in display_df.columns[1:4]:
@@ -737,7 +760,7 @@ with st.expander("📋 View Raw Data Table"):
         color = GREEN if val > 0 else (RED if val < 0 else MUTED)
         return f"color: {color}; font-weight: 600"
 
-    styled = display_df.style.applymap(color_diff, subset=["% Difference", "Difference (bu/ac)"])
+    styled = display_df.style.applymap(color_diff, subset=["% Difference", f"Difference ({crop_unit(selected_crop)})"])
     st.dataframe(styled, use_container_width=True, hide_index=True)
 
     # CSV download
@@ -756,7 +779,7 @@ st.markdown(f"""
     Data source: Saskatchewan Crop Insurance Corporation &nbsp;|&nbsp; JGL Capital Advisory
   </div>
   <div style="font-size:0.75rem; color:{MUTED};">
-    Yields in bushels per acre (bu/ac)
+    Yields in {crop_unit(selected_crop)}
   </div>
 </div>
 """, unsafe_allow_html=True)
