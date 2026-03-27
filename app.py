@@ -344,24 +344,27 @@ rm_label_to_num = {rm_label(r): r for r in all_rms}
 # ── Sidebar controls ──────────────────────────────────────────────────────────
 st.sidebar.markdown(f"""
 <div style="padding: 1rem 0 1.5rem 0; border-bottom: 1px solid #333; margin-bottom: 1.5rem;">
+  <img src="https://jglcapital.ca/wp-content/uploads/2019/07/JGL-Capital-Logo.png"
+       onerror="this.style.display='none'"
+       style="height:38px; margin-bottom:8px; display:block;">
   <div style="font-size:1.3rem; font-weight:700; color:{GOLD}; letter-spacing:-0.02em;">JGL Capital</div>
   <div style="font-size:0.75rem; color:#888; margin-top:0.2rem;">RM Yield Analytics</div>
 </div>
 """, unsafe_allow_html=True)
 
+# RM selector — options are already full "RM 1 — Argyle" strings, so selection slot shows the name
 selected_rm_label = st.sidebar.selectbox(
     "Select Rural Municipality (RM)",
     rm_labels,
     index=0,
-    format_func=lambda x: x,
 )
 selected_rm = rm_label_to_num[selected_rm_label]
 
+# Crop selector — store display strings so selected slot shows the chosen crop clearly
 selected_crop = st.sidebar.selectbox(
     "Select Crop",
     ordered_crops,
     index=0,
-    format_func=lambda x: f"✓  {x}",
 )
 
 # Year range filter
@@ -382,10 +385,27 @@ compare_rm_labels = st.sidebar.multiselect(
 )
 compare_rms = [rm_label_to_num[lbl] for lbl in compare_rm_labels]
 
+# Sidebar footer — logo, author, address
 st.sidebar.markdown(f"""
-<div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #333; font-size:0.72rem; color:#555; line-height:1.6;">
-  Data: Saskatchewan Crop Insurance<br>
-  {min_year} – {max_year} | {len(all_rms)} RMs
+<div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #333;">
+  <img src="https://jglcapital.ca/wp-content/uploads/2019/07/JGL-Capital-Logo.png"
+       onerror="this.style.display='none'; this.nextSibling.style.display='block'"
+       style="width:110px; margin-bottom:10px; display:block; filter:brightness(0) invert(1);">
+  <div style="display:none; font-size:1rem; font-weight:700; color:{GOLD}; margin-bottom:8px;">JGL Capital</div>
+  <div style="font-size:0.72rem; color:#666; line-height:1.8;">
+    <div style="color:{GOLD_LT}; font-weight:600; margin-bottom:2px;">Quintin Stamler</div>
+    <div style="color:#888;">Futures &amp; Options Broker</div>
+    <div style="margin-top:8px; color:#666;">
+      RR 280 Hwy #1 West, Box 40<br>
+      Moose Jaw, SK &nbsp;S6H 4N7<br>
+      <a href="tel:18779071517" style="color:#888; text-decoration:none;">(877) 907-1517</a><br>
+      <a href="mailto:quintinstamler@jglcapital.ca" style="color:#888; text-decoration:none; font-size:0.68rem;">quintinstamler@jglcapital.ca</a>
+    </div>
+    <div style="margin-top:10px; color:#444; font-size:0.65rem; line-height:1.5;">
+      Data: Saskatchewan Crop Insurance<br>
+      {min_year}–{max_year} &nbsp;|&nbsp; {len(all_rms)} RMs
+    </div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
