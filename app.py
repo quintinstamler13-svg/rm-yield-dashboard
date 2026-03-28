@@ -676,6 +676,99 @@ if len(merged) > 0:
         st.plotly_chart(fig_dist, use_container_width=True)
 
 
+# ── All-crops summary table for selected RM ───────────────────────────────────
+st.markdown(f'''<div class="section-label">{selected_rm_display} — All Crops Summary</div>''', unsafe_allow_html=True)
+
+import numpy as _np
+
+def _olympic_avg(values):
+    """7-year olympic average: drop highest and lowest, average remaining 5."""
+    vals = [v for v in values if v is not None and not _np.isnan(v)]
+    if len(vals) < 5:
+        return None
+    s = sorted(vals)
+    return _np.mean(s[1:-1])
+
+# Build summary for all crops for the selected RM
+_summary_rows = []
+_all_crops_ordered = ["Canola", "Spring Wheat", "Winter Wheat", "Durum", "Barley",
+                      "Oats", "Peas", "Lentils", "Flax", "Mustard", "Canary Seed",
+                      "Fall Rye", "Spring Rye", "Tame Hay", "Sunflowers", "Chickpeas"]
+
+for _crop in _all_crops_ordered:
+    _crop_df = df[(df["RM"] == selected_rm) & (df["Crop"] == _crop)].sort_values("Year")
+    if len(_crop_df) == 0:
+        continue
+
+    # 2025 yield
+    _y2025 = _crop_df[_crop_df["Year"] == 2025]["Yield"].values
+    _yield_2025 = round(float(_y2025[0]), 1) if len(_y2025) > 0 else None
+
+    # 7-year window: 2019-2025
+    _window = _crop_df[_crop_df["Year"].between(2019, 2025)]["Yield"].values
+    _oly = _olympic_avg(_window)
+    _oly = round(float(_oly), 1) if _oly is not None else None
+
+    # SK provincial average 2025 for this crop
+    _prov_2025 = df[(df["Crop"] == _crop) & (df["Year"] == 2025)]["Yield"].mean()
+    _prov_2025 = round(float(_prov_2025), 1) if not _np.isnan(_prov_2025) else None
+
+    # % vs prov avg (2025)
+    if _yield_2025 is not None and _prov_2025 is not None and _prov_2025 > 0:
+        _vs_prov = round((_yield_2025 - _prov_2025) / _prov_2025 * 100, 1)
+    else:
+        _vs_prov = None
+
+    _unit = crop_unit(_crop)
+    _summary_rows.append({
+        "Crop": _crop,
+        f"2025 Yield": f"{_yield_2025:.1f} {_unit}" if _yield_2025 is not None else "—",
+        f"SK Avg 2025": f"{_prov_2025:.1f} {_unit}" if _prov_2025 is not None else "—",
+        "vs SK Avg": f"{_vs_prov:+.1f}%" if _vs_prov is not None else "—",
+        "7-yr Olympic Avg": f"{_oly:.1f} {_unit}" if _oly is not None else "—",
+        "_vs_prov_raw": _vs_prov,
+        "_yield_raw": _yield_2025,
+    })
+
+if _summary_rows:
+    # Build styled HTML table
+    _header_cols = ["Crop", "2025 Yield", "SK Avg 2025", "vs SK Avg", "7-yr Olympic Avg"]
+    _th = "".join(
+        f'<th style="padding:8px 14px;text-align:{"left" if c=="Crop" else "right"};border-bottom:2px solid {GOLD};font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:{MUTED};font-weight:600;">{c}</th>'
+        for c in _header_cols
+    )
+    _rows_html = ""
+    for i, r in enumerate(_summary_rows):
+        _bg = WHITE if i % 2 == 0 else "#f5f3ee"
+        _vs = r["_vs_prov_raw"]
+        _vs_color = GREEN if (_vs is not None and _vs > 0) else (RED if (_vs is not None and _vs < 0) else SLATE)
+        _bold = "font-weight:700;" if r["Crop"] == selected_crop else ""
+        _border = f"border-left:3px solid {GOLD};" if r["Crop"] == selected_crop else ""
+        _row_cells = ""
+        for col in _header_cols:
+            _align = "left" if col == "Crop" else "right"
+            _color = f"color:{_vs_color};font-weight:600;" if col == "vs SK Avg" else f"color:{SLATE};"
+            _val = r[col]
+            _row_cells += f'<td style="padding:7px 14px;text-align:{_align};{_color}{_bold}font-size:0.83rem;">{_val}</td>'
+        _rows_html += f'<tr style="background:{_bg};{_border}">{_row_cells}</tr>'
+
+    _table_html = f"""
+<div style="background:{WHITE};border:1px solid #e8e4d8;border-radius:6px;overflow:hidden;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+  <table style="width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;">
+    <thead><tr style="background:{OFFWHITE};">{_th}</tr></thead>
+    <tbody>{_rows_html}</tbody>
+  </table>
+  <div style="padding:6px 14px 8px;font-size:0.68rem;color:{MUTED};">
+    7-yr Olympic Average uses 2019–2025 data: drops the single highest and lowest year, averages the remaining 5.
+    Highlighted row = currently selected crop.
+  </div>
+</div>
+"""
+    st.markdown(_table_html, unsafe_allow_html=True)
+else:
+    st.markdown(f'<div style="color:{MUTED};font-size:0.85rem;padding:0.5rem 0;">No crop data available for {selected_rm_display}.</div>', unsafe_allow_html=True)
+
+
 # ── Data table (expandable) ───────────────────────────────────────────────────
 with st.expander("📋 View Raw Data Table"):
     display_df = merged[["Year","Yield","Prov_Avg","Diff_abs","Diff_pct"]].copy()
